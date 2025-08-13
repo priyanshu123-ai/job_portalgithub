@@ -1,5 +1,5 @@
 import { Edit2, Eye, MoreHorizontal } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
@@ -22,12 +22,13 @@ const AdminJobTable = () => {
   useAdminJob();
   const navigate = useNavigate();
 
-  const { allAdminJobs } = useSelector((store) => store.job); // ✅ Fixed
-  const search = useSelector((store) => store.company.searchCompanyByText || "");
+  const { allAdminJobs, searchQuery } = useSelector((store) => store.job); // ✅ Pulling from jobSlice
 
-  const filteredJobs = allAdminJobs.filter((job) =>
-    search ? job?.title?.toLowerCase().includes(search.trim().toLowerCase()) : true
-  );
+  const filteredJobs = allAdminJobs?.filter((job) => {
+    const title = job?.title?.toLowerCase();
+    const searchText = searchQuery?.trim().toLowerCase();
+    return title?.includes(searchText);
+  });
 
   return (
     <div className="mt-8 bg-gradient-to-br from-slate-900 to-slate-950 border border-white/10 rounded-3xl shadow-[inset_0_2px_6px_rgba(255,255,255,0.05),0_20px_30px_rgba(0,0,0,0.5)] p-6 backdrop-blur-md">
@@ -55,14 +56,10 @@ const AdminJobTable = () => {
           ) : (
             filteredJobs.map((job) => (
               <TableRow key={job._id} className="hover:bg-slate-800/40 transition duration-300">
-                <TableCell className="p-4 font-medium text-white">
-                  {job?.title}
-                </TableCell>
+                <TableCell className="p-4 font-medium text-white">{job.title}</TableCell>
+                <TableCell className="p-4 text-slate-300">{job.company?.name}</TableCell>
                 <TableCell className="p-4 text-slate-300">
-                  {job?.company?.name}
-                </TableCell>
-                <TableCell className="p-4 text-slate-300">
-                  {new Date(job?.createdAt).toLocaleDateString("en-IN", {
+                  {new Date(job.createdAt).toLocaleDateString("en-IN", {
                     day: "2-digit",
                     month: "2-digit",
                     year: "numeric",
@@ -81,7 +78,10 @@ const AdminJobTable = () => {
                         <Edit2 className="h-4 w-4 text-cyan-400" />
                         <span className="text-sm text-white">Edit</span>
                       </div>
-                      <div onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)} className="flex items-center w-fit gap-2 hover:bg-slate-700 p-2 rounded cursor-pointer transition">
+                      <div
+                        onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)}
+                        className="flex items-center gap-2 hover:bg-slate-700 p-2 rounded cursor-pointer transition"
+                      >
                         <Eye />
                         <span className="text-sm text-white">Applicants</span>
                       </div>

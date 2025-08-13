@@ -15,6 +15,7 @@ import Cjob from "./components/admin/Cjob";
 import PostJob from "./components/admin/PostJob";
 import Applicant from "./components/admin/Applicant";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
+import Verify from "./components/auth/Verify";
 
 const appRouter = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/signup",
     element: <Signup />,
+  },
+  {
+    path:"/verify",
+    element:<Verify />
   },
   {
     path: "/jobs",

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Search } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { setSearchQuery } from "../redux/jobSlice";
+import { setSearchQuery } from "../redux/jobSlice"; // ✅ from jobSlice
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -25,8 +25,8 @@ const HeroSection = () => {
   const navigate = useNavigate();
 
   const searchJobHandler = () => {
-    console.log("Query before dispatching:", query); // Debug
-    dispatch(setSearchQuery(query));
+    console.log("Query before dispatching:", query);
+    dispatch(setSearchQuery(query)); // ✅ This works with jobSlice now
     navigate("/browse");
   };
 

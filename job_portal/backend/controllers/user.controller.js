@@ -1,14 +1,15 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
+import transporter from "../utils/nodemailer.js";
+import jwt from "jsonwebtoken"
 
 export const register = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, password, role } = req.body;
 
-    // Step 1: Basic validation
+    // Validate inputs
     if (!fullname || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({
         message: "All fields are required.",
@@ -16,7 +17,7 @@ export const register = async (req, res) => {
       });
     }
 
-    // Step 2: Check if user already exists
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -25,20 +26,25 @@ export const register = async (req, res) => {
       });
     }
 
-    // Step 3: Handle optional file upload (profile photo)
+    // Optional profile picture upload to Cloudinary
     let profilePhoto = "";
     if (req.file) {
       const fileUrl = getDataUri(req.file);
       const cloudResponse = await cloudinary.uploader.upload(fileUrl.content, {
-        resource_type: "raw",
+        resource_type: "auto",
       });
       profilePhoto = cloudResponse.secure_url;
     }
 
-    // Step 4: Hash password
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Step 5: Create user
+    // Generate and hash OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+    const hashedOtp = await bcrypt.hash(otp, 10);
+    const otpExpiry = Date.now() + 15 * 60 * 1000; // OTP valid for 15 minutes
+
+    // Create user with OTP
     const user = await User.create({
       fullname,
       email,
@@ -48,10 +54,29 @@ export const register = async (req, res) => {
       profile: {
         profilePhoto,
       },
+      verifyOtp: hashedOtp,
+      verifyOtpExpiresAt: otpExpiry,
+      isAccountVerified: false,
     });
 
+    // Send OTP to user's email
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: email,
+      subject: "Verify Your Email - Job Portal",
+      html: `
+        <h2>Welcome to Job Portal</h2>
+        <p>Hi <b>${fullname}</b>,</p>
+        <p>Your OTP for email verification is:</p>
+        <h3 style="color: blue;">${otp}</h3>
+        <p>This OTP is valid for 15 minutes.</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
     return res.status(201).json({
-      message: "Account created successfully.",
+      message: "Account created. OTP sent to your email.",
       success: true,
     });
   } catch (error) {
@@ -62,6 +87,8 @@ export const register = async (req, res) => {
     });
   }
 };
+
+
 
 
 
@@ -115,6 +142,8 @@ export const login = async (req, res) => {
       profile: user.profile,
     };
 
+
+  
     return res
       .status(200)
       .cookie("token", token, {
