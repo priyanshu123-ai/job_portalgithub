@@ -20,7 +20,7 @@ app.use(cookieParser());
 
 // ✅ CORS Setup to Allow Local + Deployed Frontend
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://job-0fge.onrender.com'], // ✅ Add all frontend origins here
+  origin: ['http://localhost:5173', 'https://job-portalgithub-12345.onrender.com'], // ✅ Add all frontend origins here
   credentials: true
 };
 
