@@ -2,8 +2,12 @@ import jwt from "jsonwebtoken";
 
 // Authentication Middleware
 const isAuthenticated = (req, res, next) => {
-  // ✅ Allow public GET access to jobs
-  if (req.method === "GET" && req.originalUrl.startsWith("/api/v1/job")) {
+  // ✅ Allow public GET access to all jobs & job by ID
+  // ❌ But keep /getadminjobs protected
+  if (
+    req.method === "GET" &&
+    (req.originalUrl.startsWith("/api/v1/job/get") && !req.originalUrl.includes("getadminjobs"))
+  ) {
     return next();
   }
 
