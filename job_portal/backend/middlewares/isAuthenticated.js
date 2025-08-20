@@ -2,9 +2,12 @@ import jwt from "jsonwebtoken";
 
 // Authentication Middleware
 const isAuthenticated = (req, res, next) => {
-  const token = req.cookies.token;
+  // ✅ Allow public GET access to jobs
+  if (req.method === "GET" && req.originalUrl.startsWith("/api/v1/job")) {
+    return next();
+  }
 
-  // Optional debug
+  const token = req.cookies.token;
 
   if (!token) {
     return res.status(401).json({
@@ -14,8 +17,7 @@ const isAuthenticated = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY); // ✅ Fixed here
-   
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
     req.id = decoded.userId; // Attach user ID to req object
     next();
   } catch (error) {
