@@ -151,7 +151,9 @@ const Signup = () => {
                     onChange={changeEventHandler}
                     className="accent-sky-500 w-4 h-4"
                   />
-                  <span>{roleOption.charAt(0).toUpperCase() + roleOption.slice(1)}</span>
+                  <span>
+                    {roleOption.charAt(0).toUpperCase() + roleOption.slice(1)}
+                  </span>
                 </label>
               ))}
             </div>
@@ -170,7 +172,10 @@ const Signup = () => {
 
           {/* Submit */}
           {loading ? (
-            <Button disabled className="w-full bg-sky-600/60 cursor-not-allowed">
+            <Button
+              disabled
+              className="w-full bg-sky-600/60 cursor-not-allowed"
+            >
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
               Please wait
             </Button>
