@@ -80,7 +80,7 @@ export const register = async (req, res) => {
       console.error("Email sending failed, rolling back user creation:", mailError);
       await User.findByIdAndDelete(user._id);
       return res.status(500).json({
-        message: "Failed to send verification email. Please check your email address and try again.",
+        message: `Failed to send verification email: ${mailError.message}`,
         success: false,
       });
     }
