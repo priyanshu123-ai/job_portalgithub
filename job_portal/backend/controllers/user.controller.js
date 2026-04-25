@@ -73,7 +73,17 @@ export const register = async (req, res) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (mailError) {
+      // Email failed — delete the user so they can register again
+      console.error("Email sending failed, rolling back user creation:", mailError);
+      await User.findByIdAndDelete(user._id);
+      return res.status(500).json({
+        message: "Failed to send verification email. Please check your email address and try again.",
+        success: false,
+      });
+    }
 
     return res.status(201).json({
       message: "Account created. OTP sent to your email.",
@@ -82,7 +92,7 @@ export const register = async (req, res) => {
   } catch (error) {
     console.error("Registration Error:", error);
     return res.status(500).json({
-      message: "Registration failed. Please try again later.",
+      message: error.message || "Registration failed. Please try again later.",
       success: false,
     });
   }
